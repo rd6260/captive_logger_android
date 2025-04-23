@@ -12,7 +12,8 @@ class CaptiveLoginScreen extends StatefulWidget {
   State<CaptiveLoginScreen> createState() => _CaptiveLoginScreenState();
 }
 
-class _CaptiveLoginScreenState extends State<CaptiveLoginScreen> with SingleTickerProviderStateMixin {
+class _CaptiveLoginScreenState extends State<CaptiveLoginScreen>
+    with SingleTickerProviderStateMixin {
   bool isLoading = false;
   bool isLoggedIn = false;
   Profile? currentProfile;
@@ -25,23 +26,23 @@ class _CaptiveLoginScreenState extends State<CaptiveLoginScreen> with SingleTick
     super.initState();
     _loadProfiles();
     _checkLoginStatus();
-    
+
     // Initialize animation controller
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    
+
     // Create curved animation
     _animation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     );
-    
+
     // Start animation
     _animationController.forward();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -53,7 +54,7 @@ class _CaptiveLoginScreenState extends State<CaptiveLoginScreen> with SingleTick
     try {
       const url = "http://172.16.16.16:8090/live";
       final response = await http.get(Uri.parse(url));
-      
+
       // If we can access this endpoint, user is logged in
       if (response.statusCode == 200) {
         setState(() {
@@ -204,50 +205,77 @@ class _CaptiveLoginScreenState extends State<CaptiveLoginScreen> with SingleTick
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF1E1E2E),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('Select Profile', style: TextStyle(color: Colors.white)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Select Profile',
+            style: TextStyle(color: Colors.white),
+          ),
           content: SizedBox(
             width: double.maxFinite,
-            child: profiles.isEmpty
-                ? const Text('No profiles available', style: TextStyle(color: Colors.white70))
-                : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: profiles.length,
-                    itemBuilder: (context, index) {
-                      final profile = profiles[index];
-                      return _buildNeumorphicContainerSmall(
-                        ListTile(
-                          title: Text(profile.name, style: const TextStyle(color: Colors.white)),
-                          subtitle: Text(profile.id, style: const TextStyle(color: Colors.white70)),
-                          onTap: () {
-                            setState(() {
-                              currentProfile = profile;
-                            });
-                            _saveLastUsedProfile();
-                            Navigator.pop(context);
-                          },
-                          trailing: currentProfile?.name == profile.name
-                              ? const Icon(Icons.check_circle, color: Colors.purple)
-                              : null,
-                        ),
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                      );
-                    },
-                  ),
+            child:
+                profiles.isEmpty
+                    ? const Text(
+                      'No profiles available',
+                      style: TextStyle(color: Colors.white70),
+                    )
+                    : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: profiles.length,
+                      itemBuilder: (context, index) {
+                        final profile = profiles[index];
+                        return _buildNeumorphicContainerSmall(
+                          ListTile(
+                            title: Text(
+                              profile.name,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            subtitle: Text(
+                              profile.id,
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                            onTap: () {
+                              setState(() {
+                                currentProfile = profile;
+                              });
+                              _saveLastUsedProfile();
+                              Navigator.pop(context);
+                            },
+                            trailing:
+                                currentProfile?.name == profile.name
+                                    ? const Icon(
+                                      Icons.check_circle,
+                                      color: Colors.purple,
+                                    )
+                                    : null,
+                          ),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                        );
+                      },
+                    ),
           ),
           actions: [
             TextButton(
-              child: const Text('Manage Profiles', style: TextStyle(color: Colors.purple)),
+              child: const Text(
+                'Manage Profiles',
+                style: TextStyle(color: Colors.purple),
+              ),
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ProfilesScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilesScreen(),
+                  ),
                 ).then((_) => _loadProfiles());
               },
             ),
             TextButton(
-              child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.white70),
+              ),
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -319,176 +347,206 @@ class _CaptiveLoginScreenState extends State<CaptiveLoginScreen> with SingleTick
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-          : FadeTransition(
-              opacity: _animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.1),
-                  end: Offset.zero,
-                ).animate(_animation),
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 30),
-                        // Connection Status Card
-                        _buildNeumorphicContainer(
-                          Column(
-                            children: [
-                              Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: isLoggedIn ? Colors.purple.withOpacity(0.2) : Colors.red.withOpacity(0.1),
-                                ),
-                                child: Icon(
-                                  isLoggedIn ? Icons.wifi : Icons.wifi_off,
-                                  size: 40,
-                                  color: isLoggedIn ? Colors.purple : Colors.red,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                isLoggedIn ? 'Connected' : 'Disconnected',
-                                style: TextStyle(
-                                  color: isLoggedIn ? Colors.purple : Colors.red,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (currentProfile != null && isLoggedIn)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  child: Text(
-                                    'Logged in as ${currentProfile!.name}',
-                                    style: const TextStyle(color: Colors.white70),
+      body:
+          isLoading
+              ? const Center(
+                child: CircularProgressIndicator(color: Colors.purple),
+              )
+              : FadeTransition(
+                opacity: _animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.1),
+                    end: Offset.zero,
+                  ).animate(_animation),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 30),
+                          // Connection Status Card
+                          _buildNeumorphicContainer(
+                            Column(
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color:
+                                        isLoggedIn
+                                            ? Colors.purple.withValues(
+                                              alpha: .2,
+                                            )
+                                            : Colors.red.withValues(alpha: .1),
+                                  ),
+                                  child: Icon(
+                                    isLoggedIn ? Icons.wifi : Icons.wifi_off,
+                                    size: 40,
+                                    color:
+                                        isLoggedIn ? Colors.purple : Colors.red,
                                   ),
                                 ),
-                            ],
-                          ),
-                        ),
-                        
-                        // Current Profile Selector
-                        _buildNeumorphicContainer(
-                          InkWell(
-                            onTap: _showProfileSelectionDialog,
-                            borderRadius: BorderRadius.circular(20),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF292945),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.person,
-                                          color: Colors.purple,
-                                          size: 24,
-                                        ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  isLoggedIn ? 'Connected' : 'Disconnected',
+                                  style: TextStyle(
+                                    color:
+                                        isLoggedIn ? Colors.purple : Colors.red,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (currentProfile != null && isLoggedIn)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Text(
+                                      'Logged in as ${currentProfile!.name}',
+                                      style: const TextStyle(
+                                        color: Colors.white70,
                                       ),
-                                      const SizedBox(width: 16),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'Current Profile',
-                                            style: TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 14,
-                                            ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+
+                          // Current Profile Selector
+                          _buildNeumorphicContainer(
+                            InkWell(
+                              onTap: _showProfileSelectionDialog,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF292945),
+                                            shape: BoxShape.circle,
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            currentProfile?.name ?? 'No Profile Selected',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                          child: const Icon(
+                                            Icons.person,
+                                            color: Colors.purple,
+                                            size: 24,
                                           ),
-                                          if (currentProfile != null)
-                                            Text(
-                                              currentProfile!.id,
-                                              style: const TextStyle(
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Current Profile',
+                                              style: TextStyle(
                                                 color: Colors.white70,
                                                 fontSize: 14,
                                               ),
                                             ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Colors.purple,
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        
-                        const Spacer(),
-                        
-                        // Login/Logout Button
-                        _buildNeumorphicContainer(
-                          GestureDetector(
-                            onTap: currentProfile == null ? null : _toggleConnection,
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: currentProfile == null
-                                      ? [Colors.grey.shade800, Colors.grey.shade900]
-                                      : isLoggedIn
-                                          ? [Colors.red.shade700, Colors.red.shade900]
-                                          : [Colors.purple.shade700, Colors.purple.shade900],
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              currentProfile?.name ??
+                                                  'No Profile Selected',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            if (currentProfile != null)
+                                              Text(
+                                                currentProfile!.id,
+                                                style: const TextStyle(
+                                                  color: Colors.white70,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    const Icon(
+                                      Icons.arrow_forward_ios,
+                                      color: Colors.purple,
+                                      size: 16,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    isLoggedIn ? Icons.logout : Icons.login,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    isLoggedIn ? 'Logout' : 'Login',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ),
-                          margin: const EdgeInsets.only(bottom: 30),
-                        ),
-                      ],
+
+                          const Spacer(),
+
+                          // Login/Logout Button
+                          _buildNeumorphicContainer(
+                            GestureDetector(
+                              onTap:
+                                  currentProfile == null
+                                      ? null
+                                      : _toggleConnection,
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 20,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors:
+                                        currentProfile == null
+                                            ? [
+                                              Colors.grey.shade800,
+                                              Colors.grey.shade900,
+                                            ]
+                                            : isLoggedIn
+                                            ? [
+                                              Colors.red.shade700,
+                                              Colors.red.shade900,
+                                            ]
+                                            : [
+                                              Colors.purple.shade700,
+                                              Colors.purple.shade900,
+                                            ],
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      isLoggedIn ? Icons.logout : Icons.login,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      isLoggedIn ? 'Logout' : 'Login',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            margin: const EdgeInsets.only(bottom: 30),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
     );
   }
 }
