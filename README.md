@@ -4,8 +4,8 @@ Captive Logger Android streamlines the process of connecting to and managing cap
 
 ## Screenshots
 
-![App Screenshot](src/screenshots/preview.png)
-*Main interface showing automatic login and sharing features*
+![App Screenshot](src/screenshots/Preview-1.png)
+![App Screenshot](src/screenshots/Preview-2.png)
 
 ## Features
 
